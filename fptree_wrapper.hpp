@@ -1,7 +1,7 @@
 #ifndef __FPTREE_WRAPPER_HPP__
 #define __FPTREE_WRAPPER_HPP__
 
-#include "tree_api.hpp"
+#include "tree_api.h"
 #include "fptree.h"
 
 #include <cstring>
@@ -15,14 +15,14 @@ class fptree_wrapper : public tree_api
 {
 public:
     fptree_wrapper();
-    virtual ~fptree_wrapper();
+    ~fptree_wrapper() override;
     
-    virtual bool find(const char* key, size_t key_sz, char* value_out) override;
-    virtual bool insert(const char* key, size_t key_sz, const char* value, size_t value_sz) override;
-    virtual bool update(const char* key, size_t key_sz, const char* value, size_t value_sz) override;
-    virtual bool remove(const char* key, size_t key_sz) override;
-    virtual int scan(const char* key, size_t key_sz, int scan_sz, char*& values_out) override;
-
+    bool find(const char* key, size_t key_sz, char* value_out) override;
+    bool insert(const char* key, size_t key_sz, const char* value, size_t value_sz) override;
+    bool update(const char* key, size_t key_sz, const char* value, size_t value_sz) override;
+    bool remove(const char* key, size_t key_sz) override;
+    int scan(const char* key, size_t key_sz, int scan_sz, char*& values_out) override;
+    long get_size() override;
 private:
     FPtree tree_;
 };
@@ -88,6 +88,10 @@ bool fptree_wrapper::remove(const char* key, size_t key_sz)
         return false;
     }
     return true;
+}
+
+long fptree_wrapper::get_size() {
+  return tree_.total_size;
 }
 
 int fptree_wrapper::scan(const char* key, size_t key_sz, int scan_sz, char*& values_out)

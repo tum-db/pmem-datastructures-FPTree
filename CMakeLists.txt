@@ -11,11 +11,10 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/src)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/src)
 
 
-if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++17 -lpmem -lpmemobj -ljemalloc -mavx512f -mavx512vl -mavx512bw -mavx512dq -mavx512cd -mrtm -ltbb -pthread")
-else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O1 -g2 -std=c++17 -lpmem -lpmemobj -mavx512f -mavx512vl -mavx512bw -mavx512dq -mavx512cd -mrtm -ltbb -pthread")
-endif()
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++17 -ljemalloc -mavx512f -mavx512vl -mavx512bw -mavx512dq -mavx512cd -mrtm -pthread")
+
+link_directories(oneTBB/build/gnu_9.3_cxx11_64_release)
+include_directories(/home/vogel/build/oneTBB/include)
 
 
 set(PMEM_BACKEND "PMEM" CACHE STRING "Persistent memory backend type")
@@ -62,18 +61,9 @@ else()
   )
 endif()
 
-##################### PiBench #########################
-FetchContent_Declare(
-        pibench 
-        GIT_REPOSITORY https://github.com/sfu-dis/pibench.git
-        GIT_TAG master 
-)
-if (NOT pibench_POPULATED)
-  FetchContent_Populate(pibench)
-  include_directories(${pibench_SOURCE_DIR}/include)
-endif ()
-
 
 add_library(fptree_pibench_wrapper SHARED fptree_wrapper.cpp
-						fptree.cpp)
+						fptree.cpp tree_api.h)
 
+
+target_link_libraries(fptree_pibench_wrapper /home/vogel/build/oneTBB/build/gnu_9.3_cxx11_64_release/libtbb.so /usr/local/lib/libpmemobj.so /usr/local/lib/libpmem.so )

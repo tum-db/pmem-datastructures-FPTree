@@ -214,13 +214,14 @@ FPtree::FPtree()
 {
     root = nullptr;
     #ifdef PMEM
-        const char *path = "./test_pool";
+        const char *path = "/mnt/pmem0/vogel/fptree";
 
         if (file_pool_exists(path) == 0) 
         {
             if ((pop = pmemobj_create(path, POBJ_LAYOUT_NAME(FPtree), PMEMOBJ_POOL_SIZE, 0666)) == NULL) 
                 perror("failed to create pool\n");
             root_LogArray = allocLogArray();
+            total_size += sizeof(struct Log) * sizeLogArray;
         } 
         else 
         {
@@ -615,6 +616,7 @@ bool FPtree::insert(struct KV kv)
                 TOID(struct List) ListHead = POBJ_ROOT(pop, struct List);
                 TOID(struct LeafNode) *dst = &D_RW(ListHead)->head;
                 POBJ_ALLOC(pop, dst, struct LeafNode, args.size, constructLeafNode, &args);
+                total_size += args.size;
                 D_RW(ListHead)->head = *dst; 
                 pmemobj_persist(pop, &D_RO(ListHead)->head, sizeof(D_RO(ListHead)->head));
                 root = (struct BaseNode *) pmemobj_direct((*dst).oid);
@@ -687,6 +689,7 @@ uint64_t FPtree::splitLeaf(LeafNode* leaf)
         log->PLeaf = *dst;
 
         POBJ_ALLOC(pop, dst, struct LeafNode, args.size, constructLeafNode, &args);
+        total_size += args.size;
 
         for (size_t i = 0; i < MAX_LEAF_SIZE; i++)
         {

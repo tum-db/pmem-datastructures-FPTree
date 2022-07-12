@@ -39,17 +39,11 @@
 #include <thread>
 #include <boost/lockfree/queue.hpp>
 
-#ifdef TEST_MODE
-    #define MAX_INNER_SIZE 3
-    #define MAX_LEAF_SIZE 4
-    #define SIZE_ONE_BYTE_HASH 1
-    #define SIZE_PMEM_POINTER 16
-#else
-    #define MAX_INNER_SIZE 128
-    #define MAX_LEAF_SIZE 64
-    #define SIZE_ONE_BYTE_HASH 1
-    #define SIZE_PMEM_POINTER 16
-#endif
+
+#define MAX_INNER_SIZE 128
+#define MAX_LEAF_SIZE 64
+#define SIZE_ONE_BYTE_HASH 1
+#define SIZE_PMEM_POINTER 16
 
 #if MAX_LEAF_SIZE > 64
     #error "Number of kv pairs in LeafNode must be <= 64."
@@ -62,7 +56,7 @@ enum Result { Insert, Update, Split, Abort, Delete, Remove, NotFound };
 #ifdef PMEM
     #include <libpmemobj.h>
 
-    #define PMEMOBJ_POOL_SIZE ((size_t)(1024 * 1024 * 11) * 1000)  /* 11 GB */
+    #define PMEMOBJ_POOL_SIZE ((size_t)(1024 * 1024 * 200) * 1000)  /* 200 GB */
 
     POBJ_LAYOUT_BEGIN(FPtree);
     POBJ_LAYOUT_ROOT(FPtree, struct List);
@@ -399,6 +393,8 @@ struct FPtree
 
         void showList();
     #endif
+
+    uint64_t total_size = 0;
 
  private:
     // return leaf that may contain key, does not push inner nodes
